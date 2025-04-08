@@ -67,7 +67,7 @@ describe('Leave Controller Tests', () => {
         },
       ];
 
-      prisma.leave.findMany.mockResolvedValue(mockLeaves);
+      (prisma.leave.findMany as jest.Mock).mockResolvedValue(mockLeaves);
 
       await getAllLeaves({} as Request, mockRes as Response);
 
@@ -75,7 +75,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.leave.findMany.mockRejectedValue(new Error('Database error'));
+      (prisma.leave.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       await getAllLeaves({} as Request, mockRes as Response);
 
@@ -107,7 +107,7 @@ describe('Leave Controller Tests', () => {
         },
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(mockLeave);
       mockReq = { params: { id: '1' } };
 
       await getLeaveById(mockReq as Request, mockRes as Response);
@@ -116,7 +116,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should return 404 if leave request not found', async () => {
-      prisma.leave.findUnique.mockResolvedValue(null);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(null);
       mockReq = { params: { id: '1' } };
 
       await getLeaveById(mockReq as Request, mockRes as Response);
@@ -126,7 +126,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.leave.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.leave.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
       mockReq = { params: { id: '1' } };
 
       await getLeaveById(mockReq as Request, mockRes as Response);
@@ -153,8 +153,8 @@ describe('Leave Controller Tests', () => {
         },
       ];
 
-      prisma.employee.findUnique.mockResolvedValue({ id: '1' });
-      prisma.leave.findMany.mockResolvedValue(mockLeaves);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue({ id: '1' });
+      (prisma.leave.findMany as jest.Mock).mockResolvedValue(mockLeaves);
       mockReq = { 
         params: { employeeId: '1' },
         query: {},
@@ -166,7 +166,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should return 404 if employee not found', async () => {
-      prisma.employee.findUnique.mockResolvedValue(null);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(null);
       mockReq = { 
         params: { employeeId: '1' },
         query: {},
@@ -179,7 +179,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.employee.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.employee.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
       mockReq = { 
         params: { employeeId: '1' },
         query: {},
@@ -220,9 +220,9 @@ describe('Leave Controller Tests', () => {
         },
       };
 
-      prisma.employee.findUnique.mockResolvedValue(mockEmployee);
-      prisma.leave.findFirst.mockResolvedValue(null);
-      prisma.leave.create.mockResolvedValue(mockLeave);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(mockEmployee);
+      (prisma.leave.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.leave.create as jest.Mock).mockResolvedValue(mockLeave);
 
       mockReq = {
         body: {
@@ -241,7 +241,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should return 404 if employee not found', async () => {
-      prisma.employee.findUnique.mockResolvedValue(null);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         body: {
@@ -265,8 +265,8 @@ describe('Leave Controller Tests', () => {
         employeeId: 'EMP001',
       };
 
-      prisma.employee.findUnique.mockResolvedValue(mockEmployee);
-      prisma.leave.findFirst.mockResolvedValue({
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(mockEmployee);
+      (prisma.leave.findFirst as jest.Mock).mockResolvedValue({
         id: '1',
         employeeId: '1',
         status: 'PENDING',
@@ -291,7 +291,7 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.employee.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.employee.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         body: {
@@ -315,6 +315,11 @@ describe('Leave Controller Tests', () => {
 
   describe('updateLeave', () => {
     it('should update a leave request', async () => {
+      const mockEmployee = {
+        id: '1',
+        employeeId: 'EMP001',
+      };
+
       const mockLeave = {
         id: '1',
         employeeId: '1',
@@ -323,44 +328,36 @@ describe('Leave Controller Tests', () => {
         type: 'ANNUAL',
         reason: 'Vacation',
         status: 'PENDING',
-        employee: {
-          id: '1',
-          employeeId: 'EMP001',
-          user: {
-            firstName: 'John',
-            lastName: 'Doe',
-          },
-        },
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
-      prisma.leave.update.mockResolvedValue(mockLeave);
+      const mockUpdatedLeave = {
+        ...mockLeave,
+        reason: 'Family vacation',
+      };
+
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(mockEmployee);
+      (prisma.leave.findFirst as jest.Mock).mockResolvedValue(mockLeave);
+      (prisma.leave.update as jest.Mock).mockResolvedValue(mockUpdatedLeave);
 
       mockReq = {
         params: { id: '1' },
         body: {
-          startDate: new Date(),
-          endDate: new Date(),
-          type: 'SICK',
-          reason: 'Illness',
+          reason: 'Family vacation',
         },
       };
 
       await updateLeave(mockReq as Request, mockRes as Response);
 
-      expect(jsonMock).toHaveBeenCalledWith(mockLeave);
+      expect(jsonMock).toHaveBeenCalledWith(mockUpdatedLeave);
     });
 
     it('should return 404 if leave request not found', async () => {
-      prisma.leave.findUnique.mockResolvedValue(null);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         params: { id: '1' },
         body: {
-          startDate: new Date(),
-          endDate: new Date(),
-          type: 'SICK',
-          reason: 'Illness',
+          reason: 'Family vacation',
         },
       };
 
@@ -376,15 +373,12 @@ describe('Leave Controller Tests', () => {
         status: 'APPROVED',
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(mockLeave);
 
       mockReq = {
         params: { id: '1' },
         body: {
-          startDate: new Date(),
-          endDate: new Date(),
-          type: 'SICK',
-          reason: 'Illness',
+          reason: 'Family vacation',
         },
       };
 
@@ -397,15 +391,12 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.leave.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.employee.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         params: { id: '1' },
         body: {
-          startDate: new Date(),
-          endDate: new Date(),
-          type: 'SICK',
-          reason: 'Illness',
+          reason: 'Family vacation',
         },
       };
 
@@ -420,7 +411,7 @@ describe('Leave Controller Tests', () => {
   });
 
   describe('processLeave', () => {
-    it('should approve a leave request', async () => {
+    it('should process a leave request', async () => {
       const mockLeave = {
         id: '1',
         employeeId: '1',
@@ -429,48 +420,38 @@ describe('Leave Controller Tests', () => {
         type: 'ANNUAL',
         reason: 'Vacation',
         status: 'PENDING',
-        employee: {
-          id: '1',
-          employeeId: 'EMP001',
-          user: {
-            firstName: 'John',
-            lastName: 'Doe',
-          },
-        },
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
-      prisma.leave.update.mockResolvedValue({
+      const mockProcessedLeave = {
         ...mockLeave,
         status: 'APPROVED',
-        approvedBy: '1',
-      });
+        approvedById: 'admin1',
+      };
+
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(mockLeave);
+      (prisma.leave.update as jest.Mock).mockResolvedValue(mockProcessedLeave);
 
       mockReq = {
         params: { id: '1' },
         body: {
           status: 'APPROVED',
-          approvedBy: '1',
+          approvedById: 'admin1',
         },
       };
 
       await processLeave(mockReq as Request, mockRes as Response);
 
-      expect(jsonMock).toHaveBeenCalledWith({
-        ...mockLeave,
-        status: 'APPROVED',
-        approvedBy: '1',
-      });
+      expect(jsonMock).toHaveBeenCalledWith(mockProcessedLeave);
     });
 
     it('should return 404 if leave request not found', async () => {
-      prisma.leave.findUnique.mockResolvedValue(null);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         params: { id: '1' },
         body: {
           status: 'APPROVED',
-          approvedBy: '1',
+          approvedById: 'admin1',
         },
       };
 
@@ -481,13 +462,13 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.leave.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.leave.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         params: { id: '1' },
         body: {
           status: 'APPROVED',
-          approvedBy: '1',
+          approvedById: 'admin1',
         },
       };
 
@@ -505,13 +486,20 @@ describe('Leave Controller Tests', () => {
     it('should delete a leave request', async () => {
       const mockLeave = {
         id: '1',
+        employeeId: '1',
+        startDate: new Date(),
+        endDate: new Date(),
+        type: 'ANNUAL',
+        reason: 'Vacation',
         status: 'PENDING',
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
-      prisma.leave.delete.mockResolvedValue(mockLeave);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(mockLeave);
+      (prisma.leave.delete as jest.Mock).mockResolvedValue(mockLeave);
 
-      mockReq = { params: { id: '1' } };
+      mockReq = {
+        params: { id: '1' },
+      };
 
       await deleteLeave(mockReq as Request, mockRes as Response);
 
@@ -519,9 +507,11 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should return 404 if leave request not found', async () => {
-      prisma.leave.findUnique.mockResolvedValue(null);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(null);
 
-      mockReq = { params: { id: '1' } };
+      mockReq = {
+        params: { id: '1' },
+      };
 
       await deleteLeave(mockReq as Request, mockRes as Response);
 
@@ -535,9 +525,11 @@ describe('Leave Controller Tests', () => {
         status: 'APPROVED',
       };
 
-      prisma.leave.findUnique.mockResolvedValue(mockLeave);
+      (prisma.leave.findUnique as jest.Mock).mockResolvedValue(mockLeave);
 
-      mockReq = { params: { id: '1' } };
+      mockReq = {
+        params: { id: '1' },
+      };
 
       await deleteLeave(mockReq as Request, mockRes as Response);
 
@@ -548,9 +540,11 @@ describe('Leave Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.leave.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.leave.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
-      mockReq = { params: { id: '1' } };
+      mockReq = {
+        params: { id: '1' },
+      };
 
       await deleteLeave(mockReq as Request, mockRes as Response);
 

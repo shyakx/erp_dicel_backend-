@@ -22,15 +22,15 @@ export const getAttendanceReport = async (req: Request, res: Response) => {
 
     // Validate date format
     if (startDate && !Date.parse(startDate as string)) {
-      return res.status(500).json({ message: 'Error generating attendance report', error: 'Invalid start date format' });
+      return res.status(400).json({ message: 'Error generating attendance report', error: 'Invalid start date format' });
     }
     if (endDate && !Date.parse(endDate as string)) {
-      return res.status(500).json({ message: 'Error generating attendance report', error: 'Invalid end date format' });
+      return res.status(400).json({ message: 'Error generating attendance report', error: 'Invalid end date format' });
     }
 
     // Handle export format validation before database query
     if (format && format !== 'json' && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating attendance report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating attendance report', error: 'Invalid export format' });
     }
 
     let attendance;
@@ -96,21 +96,21 @@ export const getLeaveReport = async (req: Request, res: Response) => {
 
     // Validate date formats if provided
     if (startDate && !Date.parse(startDate as string)) {
-      return res.status(500).json({ message: 'Error generating leave report', error: 'Invalid start date format' });
+      return res.status(400).json({ message: 'Error generating leave report', error: 'Invalid start date format' });
     }
 
     if (endDate && !Date.parse(endDate as string)) {
-      return res.status(500).json({ message: 'Error generating leave report', error: 'Invalid end date format' });
+      return res.status(400).json({ message: 'Error generating leave report', error: 'Invalid end date format' });
     }
 
     // Validate status if provided
     if (status && !['PENDING', 'APPROVED', 'REJECTED'].includes(status as string)) {
-      return res.status(500).json({ message: 'Error generating leave report', error: 'Invalid status value' });
+      return res.status(400).json({ message: 'Error generating leave report', error: 'Invalid status value' });
     }
 
     // Handle export format
     if (format && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating leave report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating leave report', error: 'Invalid export format' });
     }
 
     const leaves = await prisma.leave.findMany({
@@ -154,21 +154,21 @@ export const getPayrollReport = async (req: Request, res: Response) => {
 
     // Validate date formats if provided
     if (startDate && !Date.parse(startDate as string)) {
-      return res.status(500).json({ message: 'Error generating payroll report', error: 'Invalid start date format' });
+      return res.status(400).json({ message: 'Error generating payroll report', error: 'Invalid start date format' });
     }
 
     if (endDate && !Date.parse(endDate as string)) {
-      return res.status(500).json({ message: 'Error generating payroll report', error: 'Invalid end date format' });
+      return res.status(400).json({ message: 'Error generating payroll report', error: 'Invalid end date format' });
     }
 
     // Validate status if provided
     if (status && !['PENDING', 'PAID'].includes(status as string)) {
-      return res.status(500).json({ message: 'Error generating payroll report', error: 'Invalid status value' });
+      return res.status(400).json({ message: 'Error generating payroll report', error: 'Invalid status value' });
     }
 
     // Handle export format
     if (format && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating payroll report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating payroll report', error: 'Invalid export format' });
     }
 
     const payrolls = await prisma.payroll.findMany({
@@ -212,36 +212,35 @@ export const getIncidentReport = async (req: Request, res: Response) => {
 
     // Validate date formats if provided
     if (startDate && !Date.parse(startDate as string)) {
-      return res.status(500).json({ message: 'Error generating incident report', error: 'Invalid start date format' });
+      return res.status(400).json({ message: 'Error generating incident report', error: 'Invalid start date format' });
     }
 
     if (endDate && !Date.parse(endDate as string)) {
-      return res.status(500).json({ message: 'Error generating incident report', error: 'Invalid end date format' });
+      return res.status(400).json({ message: 'Error generating incident report', error: 'Invalid end date format' });
     }
 
     // Validate status if provided
     if (status && !['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].includes(status as string)) {
-      return res.status(500).json({ message: 'Error generating incident report', error: 'Invalid status value' });
+      return res.status(400).json({ message: 'Error generating incident report', error: 'Invalid status value' });
     }
 
     // Handle export format
     if (format && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating incident report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating incident report', error: 'Invalid export format' });
     }
 
     const incidents = await prisma.incident.findMany({
       where: {
-        ...(startDate && { date: { gte: new Date(startDate as string) } }),
-        ...(endDate && { date: { lte: new Date(endDate as string) } }),
+        ...(startDate && { reportedDate: { gte: new Date(startDate as string) } }),
+        ...(endDate && { reportedDate: { lte: new Date(endDate as string) } }),
         ...(status && { status: status as IncidentStatus }),
       },
       include: {
-        employee: {
+        project: {
           include: {
-            user: true
+            client: true
           }
-        },
-        project: true,
+        }
       },
     });
 
@@ -252,7 +251,7 @@ export const getIncidentReport = async (req: Request, res: Response) => {
         'incident-report',
         res,
         {
-          fields: ['employee.user.firstName', 'employee.user.lastName', 'project.name', 'description', 'status', 'date'],
+          fields: ['employee.user.firstName', 'employee.user.lastName', 'title', 'description', 'severity', 'status', 'reportedDate'],
           title: 'Incident Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -270,13 +269,13 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
     const { status, format } = req.query;
 
     // Validate status if provided
-    if (status && !['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RETIRED'].includes(status as string)) {
-      return res.status(500).json({ message: 'Error generating equipment report', error: 'Invalid status value' });
+    if (status && !['AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED'].includes(status as string)) {
+      return res.status(400).json({ message: 'Error generating equipment report', error: 'Invalid status value' });
     }
 
     // Handle export format
     if (format && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating equipment report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating equipment report', error: 'Invalid export format' });
     }
 
     const equipment = await prisma.equipment.findMany({
@@ -284,7 +283,11 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
         ...(status && { status: status as EquipmentStatus }),
       },
       include: {
-        project: true,
+        assignments: {
+          include: {
+            project: true,
+          },
+        },
       },
     });
 
@@ -295,7 +298,7 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
         'equipment-report',
         res,
         {
-          fields: ['name', 'type', 'serialNumber', 'status', 'project.name'],
+          fields: ['name', 'type', 'serialNumber', 'status', 'purchaseDate', 'lastMaintenance', 'nextMaintenance'],
           title: 'Equipment Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -313,13 +316,13 @@ export const getProjectReport = async (req: Request, res: Response) => {
     const { status, format } = req.query;
 
     // Validate status if provided
-    if (status && !['PLANNING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD', 'CANCELLED'].includes(status as string)) {
-      return res.status(500).json({ message: 'Error generating project report', error: 'Invalid status value' });
+    if (status && !['ACTIVE', 'COMPLETED', 'CANCELLED'].includes(status as string)) {
+      return res.status(400).json({ message: 'Error generating project report', error: 'Invalid status value' });
     }
 
     // Handle export format
     if (format && !['csv', 'excel', 'pdf', 'preview'].includes(format as string)) {
-      return res.status(500).json({ message: 'Error generating project report', error: 'Invalid export format' });
+      return res.status(400).json({ message: 'Error generating project report', error: 'Invalid export format' });
     }
 
     const projects = await prisma.project.findMany({
@@ -327,10 +330,15 @@ export const getProjectReport = async (req: Request, res: Response) => {
         ...(status && { status: status as Status }),
       },
       include: {
-        employees: {
+        client: true,
+        assignments: {
           include: {
-            user: true
-          }
+            employee: {
+              include: {
+                user: true,
+              },
+            },
+          },
         },
       },
     });
@@ -342,7 +350,7 @@ export const getProjectReport = async (req: Request, res: Response) => {
         'project-report',
         res,
         {
-          fields: ['name', 'description', 'startDate', 'endDate', 'status', 'employees.user.firstName', 'employees.user.lastName'],
+          fields: ['name', 'description', 'client.name', 'status', 'startDate', 'endDate', 'budget'],
           title: 'Project Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
