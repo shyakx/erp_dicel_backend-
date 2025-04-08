@@ -65,7 +65,7 @@ describe('Attendance Controller Tests', () => {
         },
       ];
 
-      prisma.attendance.findMany.mockResolvedValue(mockAttendance);
+      (prisma.attendance.findMany as jest.Mock).mockResolvedValue(mockAttendance);
 
       await getAllAttendance({} as Request, mockRes as Response);
 
@@ -73,7 +73,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.attendance.findMany.mockRejectedValue(new Error('Database error'));
+      (prisma.attendance.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       await getAllAttendance({} as Request, mockRes as Response);
 
@@ -105,7 +105,7 @@ describe('Attendance Controller Tests', () => {
         },
       };
 
-      prisma.attendance.findUnique.mockResolvedValue(mockAttendance);
+      (prisma.attendance.findUnique as jest.Mock).mockResolvedValue(mockAttendance);
       mockReq = { params: { id: '1' } };
 
       await getAttendanceById(mockReq as Request, mockRes as Response);
@@ -114,7 +114,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should return 404 if attendance not found', async () => {
-      prisma.attendance.findUnique.mockResolvedValue(null);
+      (prisma.attendance.findUnique as jest.Mock).mockResolvedValue(null);
       mockReq = { params: { id: '1' } };
 
       await getAttendanceById(mockReq as Request, mockRes as Response);
@@ -124,7 +124,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.attendance.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.attendance.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
       mockReq = { params: { id: '1' } };
 
       await getAttendanceById(mockReq as Request, mockRes as Response);
@@ -156,9 +156,9 @@ describe('Attendance Controller Tests', () => {
         employee: mockEmployee,
       };
 
-      prisma.employee.findUnique.mockResolvedValue(mockEmployee);
-      prisma.attendance.findFirst.mockResolvedValue(null);
-      prisma.attendance.create.mockResolvedValue(mockAttendance);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(mockEmployee);
+      (prisma.attendance.findFirst as jest.Mock).mockResolvedValue(null);
+      (prisma.attendance.create as jest.Mock).mockResolvedValue(mockAttendance);
 
       mockReq = {
         body: {
@@ -174,7 +174,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should return 404 if employee not found', async () => {
-      prisma.employee.findUnique.mockResolvedValue(null);
+      (prisma.employee.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         body: {
@@ -190,7 +190,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.employee.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.employee.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         body: {
@@ -225,8 +225,8 @@ describe('Attendance Controller Tests', () => {
         checkOutLocation: 'Office',
       };
 
-      prisma.attendance.findFirst.mockResolvedValue(mockAttendance);
-      prisma.attendance.update.mockResolvedValue(mockUpdatedAttendance);
+      (prisma.attendance.findFirst as jest.Mock).mockResolvedValue(mockAttendance);
+      (prisma.attendance.update as jest.Mock).mockResolvedValue(mockUpdatedAttendance);
 
       mockReq = {
         body: {
@@ -241,7 +241,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should return 404 if no check-in record found', async () => {
-      prisma.attendance.findFirst.mockResolvedValue(null);
+      (prisma.attendance.findFirst as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         body: {
@@ -253,11 +253,11 @@ describe('Attendance Controller Tests', () => {
       await checkOut(mockReq as Request, mockRes as Response);
 
       expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({ message: 'No check-in record found for today' });
+      expect(jsonMock).toHaveBeenCalledWith({ message: 'No check-in record found' });
     });
 
     it('should handle database errors', async () => {
-      prisma.attendance.findFirst.mockRejectedValue(new Error('Database error'));
+      (prisma.attendance.findFirst as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         body: {
@@ -281,15 +281,18 @@ describe('Attendance Controller Tests', () => {
       const mockAttendance = {
         id: '1',
         employeeId: '1',
-        date: new Date(),
+        checkIn: new Date(),
+        checkOut: null,
         status: 'PRESENT',
       };
 
-      prisma.attendance.findUnique.mockResolvedValue(mockAttendance);
-      prisma.attendance.update.mockResolvedValue({
+      const mockUpdatedAttendance = {
         ...mockAttendance,
         status: 'ABSENT',
-      });
+      };
+
+      (prisma.attendance.findUnique as jest.Mock).mockResolvedValue(mockAttendance);
+      (prisma.attendance.update as jest.Mock).mockResolvedValue(mockUpdatedAttendance);
 
       mockReq = {
         params: { id: '1' },
@@ -298,14 +301,11 @@ describe('Attendance Controller Tests', () => {
 
       await updateAttendanceStatus(mockReq as Request, mockRes as Response);
 
-      expect(jsonMock).toHaveBeenCalledWith({
-        ...mockAttendance,
-        status: 'ABSENT',
-      });
+      expect(jsonMock).toHaveBeenCalledWith(mockUpdatedAttendance);
     });
 
-    it('should return 404 if attendance record not found', async () => {
-      prisma.attendance.findUnique.mockResolvedValue(null);
+    it('should return 404 if attendance not found', async () => {
+      (prisma.attendance.findUnique as jest.Mock).mockResolvedValue(null);
 
       mockReq = {
         params: { id: '1' },
@@ -319,7 +319,7 @@ describe('Attendance Controller Tests', () => {
     });
 
     it('should handle database errors', async () => {
-      prisma.attendance.findUnique.mockRejectedValue(new Error('Database error'));
+      (prisma.attendance.findUnique as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       mockReq = {
         params: { id: '1' },
