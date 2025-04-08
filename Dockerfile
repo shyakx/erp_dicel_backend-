@@ -10,17 +10,21 @@ RUN apk add --no-cache \
     jpeg-dev \
     pango-dev \
     giflib-dev \
-    pixman-dev
+    pixman-dev \
+    openssl \
+    openssl-dev
 
 # Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
+# Copy package files
 COPY package*.json ./
-RUN npm install
 
-# Copy prisma schema
+# Copy prisma schema first
 COPY prisma ./prisma/
+
+# Install dependencies and generate Prisma client
+RUN npm install
 
 # Copy app source
 COPY . .
