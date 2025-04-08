@@ -1,6 +1,17 @@
 # Use Node.js LTS version
 FROM node:20-alpine
 
+# Install build dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    giflib-dev \
+    pixman-dev
+
 # Create app directory
 WORKDIR /usr/src/app
 
