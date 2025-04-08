@@ -10,30 +10,27 @@ import ExcelJS from 'exceljs';
 
 // PDF styling constants
 const PDF_STYLES = {
-  colors: {
-    primary: '#2563eb',
-    secondary: '#6b7280',
-    success: '#059669',
-    warning: '#d97706',
-    danger: '#dc2626',
-    light: '#f3f4f6',
-    dark: '#1f2937',
-    border: '#e5e7eb'
+  header: {
+    fontSize: 16,
+    bold: true,
+    marginBottom: 10
   },
-  fonts: {
-    header: 'Helvetica-Bold',
-    body: 'Helvetica'
+  subheader: {
+    fontSize: 14,
+    bold: true,
+    marginBottom: 8
   },
-  sizes: {
-    title: 24,
-    subtitle: 14,
-    header: 12,
-    body: 10
+  normal: {
+    fontSize: 12,
+    marginBottom: 6
   },
-  spacing: {
-    margin: 50,
-    rowHeight: 25,
-    headerPadding: 10
+  tableHeader: {
+    fontSize: 12,
+    bold: true,
+    fillColor: '#f0f0f0'
+  },
+  tableCell: {
+    fontSize: 10
   }
 };
 

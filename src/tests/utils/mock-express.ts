@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Creates a mock Request object for testing
- * @returns A partial Request object with common properties
+ * Creates a mock Request object
  */
 export const mockRequest = (): Partial<Request> => {
   return {
@@ -12,59 +11,56 @@ export const mockRequest = (): Partial<Request> => {
     headers: {},
     cookies: {},
     signedCookies: {},
-    path: '',
-    method: 'GET',
-    url: '',
-    originalUrl: '',
-    ip: '',
-    ips: [],
+    accepts: jest.fn(),
+    acceptsCharsets: jest.fn(),
+    acceptsEncodings: jest.fn(),
+    acceptsLanguages: jest.fn(),
+    get: jest.fn(),
+    header: jest.fn(),
+    is: jest.fn(),
     protocol: 'http',
     secure: false,
+    ip: '127.0.0.1',
+    ips: ['127.0.0.1'],
     subdomains: [],
-    hostname: '',
-    host: '',
+    path: '/',
+    hostname: 'localhost',
+    host: 'localhost:3000',
     fresh: false,
     stale: true,
     xhr: false,
-    app: {} as any,
-    route: {} as any,
+    method: 'GET',
+    originalUrl: '/',
+    url: '/',
+    baseUrl: '/',
   };
 };
 
 /**
- * Creates a mock Response object for testing
- * @returns A partial Response object with common methods
+ * Creates a mock Response object
  */
 export const mockResponse = (): Partial<Response> => {
   const res: Partial<Response> = {};
-  
-  // Mock common response methods
-  res.status = function(code: number) { return this as any; };
-  res.json = function(body: any) { return this as any; };
-  res.send = function(body: any) { return this as any; };
-  res.sendFile = function(path: string) { return this as any; };
-  res.download = function(path: string) { return this as any; };
-  res.redirect = function() { return this as any; };
-  res.render = function() { return this as any; };
-  res.end = function() { return this as any; };
-  res.setHeader = function() { return this as any; };
-  res.getHeader = function() { return ''; };
-  res.clearCookie = function() { return this as any; };
-  res.cookie = function() { return this as any; };
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  res.send = jest.fn().mockReturnValue(res);
+  res.redirect = jest.fn().mockReturnValue(res);
+  res.render = jest.fn().mockReturnValue(res);
   res.locals = {};
-  
   return res;
 };
 
 /**
- * Creates a mock NextFunction for testing
- * @returns A mock function
+ * Creates a mock NextFunction
  */
 export const mockNext = (): jest.Mock => {
   return jest.fn();
 };
 
-export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+/**
+ * Error handler middleware
+ */
+export const errorHandler = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
   res.status(500).json({ message: 'Internal server error', error: err.message });
 }; 

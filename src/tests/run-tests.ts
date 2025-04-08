@@ -1,5 +1,6 @@
 import { getAttendanceReport, getLeaveReport, getPayrollReport, getIncidentReport, getEquipmentReport, getProjectReport } from '../controllers/report.controller';
 import { Request, Response } from 'express';
+import { mockRequest, mockResponse, mockNext } from './utils/mock-express';
 
 // Mock Prisma client
 const mockPrismaClient = {
@@ -109,6 +110,21 @@ describe('Report Controller Tests', () => {
       status: statusMock,
       json: jsonMock,
     };
+    mockReq = {
+      query: {}
+    };
     jest.clearAllMocks();
+  });
+
+  describe('getAttendanceReport', () => {
+    it('should return attendance data when valid parameters are provided', async () => {
+      mockReq.query = {
+        startDate: '2024-01-01',
+        endDate: '2024-01-31',
+        format: 'json'
+      };
+      await getAttendanceReport(mockReq as Request, mockRes as Response);
+      expect(statusMock).toHaveBeenCalledWith(200);
+    });
   });
 }); 
