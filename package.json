@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node build/app.js",
     "dev": "nodemon src/app.ts",
-    "build": "npm run prisma:generate && tsc",
+    "build": "tsc",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",

@@ -6,11 +6,10 @@ WORKDIR /usr/src/app
 
 # Install app dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copy prisma schema and generate client
+# Copy prisma schema
 COPY prisma ./prisma/
-RUN npx prisma generate
 
 # Copy app source
 COPY . .
