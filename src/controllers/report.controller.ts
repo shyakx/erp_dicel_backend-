@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { handleExport } from '../utils/export.utils';
 import prisma from '../lib/prisma';
+import { LeaveStatus, PayrollStatus, IncidentStatus, EquipmentStatus, Status } from '@prisma/client';
 
 type ExportFormat = 'csv' | 'excel' | 'pdf' | 'preview';
 
@@ -48,7 +49,11 @@ export const getAttendanceReport = async (req: Request, res: Response) => {
           })
         },
         include: {
-          employee: true
+          employee: {
+            include: {
+              user: true
+            }
+          }
         }
       });
     } catch (dbError) {
@@ -58,9 +63,9 @@ export const getAttendanceReport = async (req: Request, res: Response) => {
       });
     }
 
-    const formattedData = attendance.map((record: AttendanceRecord) => ({
+    const formattedData = attendance.map((record) => ({
       employeeId: record.employeeId,
-      employeeName: `${record.employee.firstName} ${record.employee.lastName}`,
+      employeeName: `${record.employee.user.firstName} ${record.employee.user.lastName}`,
       checkIn: record.checkIn.toISOString(),
       checkOut: record.checkOut?.toISOString() || '',
       duration: record.checkOut ? 
@@ -112,10 +117,14 @@ export const getLeaveReport = async (req: Request, res: Response) => {
       where: {
         ...(startDate && { startDate: { gte: new Date(startDate as string) } }),
         ...(endDate && { endDate: { lte: new Date(endDate as string) } }),
-        ...(status && { status }),
+        ...(status && { status: status as LeaveStatus }),
       },
       include: {
-        employee: true,
+        employee: {
+          include: {
+            user: true
+          }
+        },
       },
     });
 
@@ -126,7 +135,7 @@ export const getLeaveReport = async (req: Request, res: Response) => {
         'leave-report',
         res,
         {
-          fields: ['employee.firstName', 'employee.lastName', 'startDate', 'endDate', 'type', 'status'],
+          fields: ['employee.user.firstName', 'employee.user.lastName', 'startDate', 'endDate', 'type', 'status'],
           title: 'Leave Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -166,10 +175,14 @@ export const getPayrollReport = async (req: Request, res: Response) => {
       where: {
         ...(startDate && { date: { gte: new Date(startDate as string) } }),
         ...(endDate && { date: { lte: new Date(endDate as string) } }),
-        ...(status && { status }),
+        ...(status && { status: status as PayrollStatus }),
       },
       include: {
-        employee: true,
+        employee: {
+          include: {
+            user: true
+          }
+        },
       },
     });
 
@@ -180,7 +193,7 @@ export const getPayrollReport = async (req: Request, res: Response) => {
         'payroll-report',
         res,
         {
-          fields: ['employee.firstName', 'employee.lastName', 'amount', 'month', 'year', 'status'],
+          fields: ['employee.user.firstName', 'employee.user.lastName', 'amount', 'month', 'year', 'status'],
           title: 'Payroll Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -220,10 +233,14 @@ export const getIncidentReport = async (req: Request, res: Response) => {
       where: {
         ...(startDate && { date: { gte: new Date(startDate as string) } }),
         ...(endDate && { date: { lte: new Date(endDate as string) } }),
-        ...(status && { status }),
+        ...(status && { status: status as IncidentStatus }),
       },
       include: {
-        employee: true,
+        employee: {
+          include: {
+            user: true
+          }
+        },
         project: true,
       },
     });
@@ -235,7 +252,7 @@ export const getIncidentReport = async (req: Request, res: Response) => {
         'incident-report',
         res,
         {
-          fields: ['employee.firstName', 'employee.lastName', 'project.name', 'description', 'status', 'date'],
+          fields: ['employee.user.firstName', 'employee.user.lastName', 'project.name', 'description', 'status', 'date'],
           title: 'Incident Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -253,7 +270,7 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
     const { status, format } = req.query;
 
     // Validate status if provided
-    if (status && !['AVAILABLE', 'ASSIGNED', 'MAINTENANCE', 'RETIRED'].includes(status as string)) {
+    if (status && !['AVAILABLE', 'IN_USE', 'MAINTENANCE', 'RETIRED'].includes(status as string)) {
       return res.status(500).json({ message: 'Error generating equipment report', error: 'Invalid status value' });
     }
 
@@ -264,7 +281,7 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
 
     const equipment = await prisma.equipment.findMany({
       where: {
-        ...(status && { status }),
+        ...(status && { status: status as EquipmentStatus }),
       },
       include: {
         project: true,
@@ -278,7 +295,7 @@ export const getEquipmentReport = async (req: Request, res: Response) => {
         'equipment-report',
         res,
         {
-          fields: ['name', 'type', 'status', 'project.name'],
+          fields: ['name', 'type', 'serialNumber', 'status', 'project.name'],
           title: 'Equipment Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }
@@ -296,7 +313,7 @@ export const getProjectReport = async (req: Request, res: Response) => {
     const { status, format } = req.query;
 
     // Validate status if provided
-    if (status && !['ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED'].includes(status as string)) {
+    if (status && !['PLANNING', 'IN_PROGRESS', 'COMPLETED', 'ON_HOLD', 'CANCELLED'].includes(status as string)) {
       return res.status(500).json({ message: 'Error generating project report', error: 'Invalid status value' });
     }
 
@@ -307,12 +324,14 @@ export const getProjectReport = async (req: Request, res: Response) => {
 
     const projects = await prisma.project.findMany({
       where: {
-        ...(status && { status }),
+        ...(status && { status: status as Status }),
       },
       include: {
-        client: true,
-        employees: true,
-        equipment: true,
+        employees: {
+          include: {
+            user: true
+          }
+        },
       },
     });
 
@@ -323,7 +342,7 @@ export const getProjectReport = async (req: Request, res: Response) => {
         'project-report',
         res,
         {
-          fields: ['name', 'client.name', 'status', 'startDate', 'endDate'],
+          fields: ['name', 'description', 'startDate', 'endDate', 'status', 'employees.user.firstName', 'employees.user.lastName'],
           title: 'Project Report',
           subtitle: 'Generated on ' + new Date().toLocaleDateString(),
         }

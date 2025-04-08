@@ -65,27 +65,27 @@ async function runTests() {
   try {
     // Test attendance report
     console.log('Testing attendance report...');
-    await getAttendanceReport(mockRequest(), mockResponse(), mockNext);
+    await getAttendanceReport(mockRequest(), mockResponse());
     
     // Test leave report
     console.log('\nTesting leave report...');
-    await getLeaveReport(mockRequest(), mockResponse(), mockNext);
+    await getLeaveReport(mockRequest(), mockResponse());
     
     // Test payroll report
     console.log('\nTesting payroll report...');
-    await getPayrollReport(mockRequest(), mockResponse(), mockNext);
+    await getPayrollReport(mockRequest(), mockResponse());
     
     // Test incident report
     console.log('\nTesting incident report...');
-    await getIncidentReport(mockRequest(), mockResponse(), mockNext);
+    await getIncidentReport(mockRequest(), mockResponse());
     
     // Test equipment report
     console.log('\nTesting equipment report...');
-    await getEquipmentReport(mockRequest(), mockResponse(), mockNext);
+    await getEquipmentReport(mockRequest(), mockResponse());
     
     // Test project report
     console.log('\nTesting project report...');
-    await getProjectReport(mockRequest(), mockResponse(), mockNext);
+    await getProjectReport(mockRequest(), mockResponse());
     
     console.log('\nAll tests completed successfully!');
   } catch (error) {

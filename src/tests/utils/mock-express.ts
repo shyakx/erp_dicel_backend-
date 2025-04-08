@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 /**
  * Creates a mock Request object for testing
@@ -28,7 +28,6 @@ export const mockRequest = (): Partial<Request> => {
     xhr: false,
     app: {} as any,
     route: {} as any,
-    accept: {} as any,
   };
 };
 
@@ -45,13 +44,13 @@ export const mockResponse = (): Partial<Response> => {
   res.send = function(body: any) { return this as any; };
   res.sendFile = function(path: string) { return this as any; };
   res.download = function(path: string) { return this as any; };
-  res.redirect = function(url: string) { return this as any; };
-  res.render = function(view: string) { return this as any; };
+  res.redirect = function() { return this as any; };
+  res.render = function() { return this as any; };
   res.end = function() { return this as any; };
-  res.setHeader = function(name: string, value: string) { return this as any; };
-  res.getHeader = function(name: string) { return ''; };
-  res.clearCookie = function(name: string) { return this as any; };
-  res.cookie = function(name: string, value: string) { return this as any; };
+  res.setHeader = function() { return this as any; };
+  res.getHeader = function() { return ''; };
+  res.clearCookie = function() { return this as any; };
+  res.cookie = function() { return this as any; };
   res.locals = {};
   
   return res;
