@@ -5,16 +5,6 @@ import { LeaveStatus, PayrollStatus, IncidentStatus, EquipmentStatus, Status } f
 
 type ExportFormat = 'csv' | 'excel' | 'pdf' | 'preview';
 
-interface AttendanceRecord {
-  employeeId: string;
-  employee: {
-    firstName: string;
-    lastName: string;
-  };
-  checkIn: Date;
-  checkOut: Date | null;
-}
-
 // Report controllers
 export const getAttendanceReport = async (req: Request, res: Response) => {
   try {

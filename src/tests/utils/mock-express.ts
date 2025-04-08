@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 
 /**
  * Creates a mock Request object for testing
@@ -62,4 +62,9 @@ export const mockResponse = (): Partial<Response> => {
  */
 export const mockNext = (): jest.Mock => {
   return jest.fn();
+};
+
+export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+  res.status(500).json({ message: 'Internal server error', error: err.message });
 }; 

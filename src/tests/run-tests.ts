@@ -94,4 +94,21 @@ async function runTests() {
 }
 
 // Run the tests
-runTests(); 
+runTests();
+
+describe('Report Controller Tests', () => {
+  let mockReq: Partial<Request>;
+  let mockRes: Partial<Response>;
+  let statusMock: jest.Mock;
+  let jsonMock: jest.Mock;
+
+  beforeEach(() => {
+    statusMock = jest.fn().mockReturnThis();
+    jsonMock = jest.fn();
+    mockRes = {
+      status: statusMock,
+      json: jsonMock,
+    };
+    jest.clearAllMocks();
+  });
+}); 

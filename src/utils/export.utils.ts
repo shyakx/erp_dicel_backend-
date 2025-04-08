@@ -6,6 +6,7 @@ import * as XLSX from 'xlsx';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import ExcelJS from 'exceljs';
 
 // PDF styling constants
 const PDF_STYLES = {

@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -14,7 +14,7 @@ async function createTestUsers() {
         firstName: 'Admin',
         lastName: 'User',
         password: await bcrypt.hash('admin123', 10),
-        role: UserRole.ADMIN
+        role: Role.ADMIN
       }
     });
 
@@ -27,7 +27,7 @@ async function createTestUsers() {
         firstName: 'Manager',
         lastName: 'User',
         password: await bcrypt.hash('manager123', 10),
-        role: UserRole.MANAGER
+        role: Role.MANAGER
       }
     });
 
@@ -40,7 +40,7 @@ async function createTestUsers() {
         firstName: 'Regular',
         lastName: 'User',
         password: await bcrypt.hash('user123', 10),
-        role: UserRole.USER
+        role: Role.USER
       }
     });
 
