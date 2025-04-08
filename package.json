@@ -18,8 +18,7 @@
     "test:e2e": "jest --config jest.config.e2e.js",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "prepare": "node -e \"process.env.NODE_ENV === 'development' && require('husky').install()\""
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [
     "erp",
