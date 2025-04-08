@@ -31,6 +31,7 @@
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@types/exceljs": "^0.5.3",
     "@types/helmet": "^0.0.48",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
@@ -41,6 +42,7 @@
     "chartjs-node-canvas": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.x",
+    "exceljs": "^4.4.0",
     "express": "^4.x",
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
